@@ -5,11 +5,13 @@ import nablarch.core.repository.di.DiContainer;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThrows;
 
 /**
  * {@link NablarchOtlpConfig}の単体テスト。
+ *
  * @author Junya Koyama
  */
 public class NablarchOtlpConfigTest {
@@ -27,8 +29,10 @@ public class NablarchOtlpConfigTest {
     @Test
     public void testDefaultFromNablarchMeterRegistryConfig() {
         NablarchOtlpConfig sut = new NablarchOtlpConfig(null, null);
-        assertThat(sut.prefix(), is(String.join(".", "nablarch.micrometer", sut.subPrefix())));
-        assertThat(sut.prefix(), is("nablarch.micrometer.otlp"));
+        assertThat(sut.prefix(), allOf(
+                is(String.join(".", "nablarch.micrometer", sut.subPrefix())),
+                is("nablarch.micrometer.otlp")
+        ));
     }
 
     /**
@@ -36,7 +40,8 @@ public class NablarchOtlpConfigTest {
      */
     @Test
     public void testDefaultFromOtlpConfig() {
-        // diContainerをnullにすると、NullPointerException
+        // diContainerをnullにすると、NullPointerExceptionとなる。
+        // 実環境でも同様に、propertiesファイルの内容が空であっても配置しなければNullPointerExceptionとなる。
         NablarchOtlpConfig sut = new NablarchOtlpConfig(null, null);
         assertThrows(NullPointerException.class, sut::url);
     }

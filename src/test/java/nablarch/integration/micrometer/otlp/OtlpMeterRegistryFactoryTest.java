@@ -10,7 +10,7 @@ import java.time.Duration;
 import java.util.Collections;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 /**
  * {@link OtlpMeterRegistryFactory}の単体テスト。
@@ -33,16 +33,19 @@ public class OtlpMeterRegistryFactoryTest {
         OtlpMeterRegistry meterRegistry = sut.createObject();
 
         NablarchOtlpConfig config = Deencapsulation.getField(meterRegistry, "config");
-        assertThat(config.url(), is("http://localhost:9090/api/v1/otlp/v1/metrics"));
 
-        // From NablarchMeterRegistryConfig
+        // setPrefixを行うと、subPrefixとは関係なく指定のprefixを取得するようになる
         assertThat(config.prefix(), is("test.otlp"));
-        //From OtlpConfig
-        assertThat(config.resourceAttributes(), is(Collections.<String, String>emptyMap()));
-        // From PushRegistryConfig
-        assertThat(config.step(), is(Duration.ofMinutes(1L)));
-        assertThat(config.enabled(), is(true));
-        assertThat(config.batchSize(), is(10000));
+        // From OtlpConfig
+        assertThat(config.url(), is("http://localhost:9090/api/v1/otlp/v1/metrics"));
+        assertThat(config.resourceAttributes(), allOf(
+                hasEntry("service.name", "nablarch-test"),
+                hasEntry("url.scheme", "http"),
+                hasEntry("service.version", "v1alpha1")
+        ));
+
+        assertThat(config.validate().failures(), empty());
+        assertThat(config.validate().isValid(), is(true));
     }
 
     /**
@@ -63,8 +66,10 @@ public class OtlpMeterRegistryFactoryTest {
         // From NablarchOtlpConfig
         assertThat(config.subPrefix(), is("otlp"));
         // From NablarchMeterRegistryConfig
-        assertThat(config.prefix(), is(String.join(".", "nablarch.micrometer", config.subPrefix())));
-        assertThat(config.prefix(), is("nablarch.micrometer.otlp"));
+        assertThat(config.prefix(), allOf(
+                is(String.join(".", "nablarch.micrometer", config.subPrefix())),
+                is("nablarch.micrometer.otlp")
+        ));
         // From OtlpConfig
         assertThat(config.url(), is("http://localhost:4318/v1/metrics"));
         assertThat(config.resourceAttributes(), is(Collections.<String, String>emptyMap()));
@@ -72,5 +77,8 @@ public class OtlpMeterRegistryFactoryTest {
         assertThat(config.step(), is(Duration.ofMinutes(1L)));
         assertThat(config.enabled(), is(true));
         assertThat(config.batchSize(), is(10000));
+
+        assertThat(config.validate().failures(), empty());
+        assertThat(config.validate().isValid(), is(true));
     }
 }
