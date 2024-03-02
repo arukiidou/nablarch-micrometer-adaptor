@@ -1,4 +1,4 @@
-package nablarch.integration.micrometer.instrument.handler;
+package nablarch.integration.micrometer.otlp;
 
 import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.Tag;
@@ -8,6 +8,8 @@ import io.micrometer.registry.otlp.OtlpConfig;
 import io.micrometer.registry.otlp.OtlpMeterRegistry;
 import nablarch.fw.ExecutionContext;
 import nablarch.fw.Handler;
+import nablarch.integration.micrometer.instrument.handler.HandlerMetricsMetaDataBuilder;
+import nablarch.integration.micrometer.instrument.handler.TimerMetricsHandler;
 import org.junit.Before;
 import org.junit.Test;
 
